@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:myclock/data.dart';
 import 'package:myclock/theme_data.dart';
@@ -28,7 +29,7 @@ class _AlarmPageState extends State<AlarmPage> {
           ),
           Expanded(
             child: ListView(
-              children: alarms.map(
+              children: alarms.map<Widget>(
                 (alarm) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 32),
@@ -111,29 +112,40 @@ class _AlarmPageState extends State<AlarmPage> {
                   );
                 },
               ).followedBy([
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  decoration: BoxDecoration(
-                      color: CustomColors.clockBG,
-                      borderRadius: BorderRadius.circular(24)),
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/add_alarm.png',
-                          scale: 1.5,
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        const Text(
-                          'Add Alarm',
-                          style: TextStyle(
-                              color: Colors.white, fontFamily: 'avenir'),
-                        )
-                      ],
+                DottedBorder(
+                  strokeWidth: 2,
+                  color: CustomColors.clockOutline,
+                  borderType: BorderType.RRect,
+                  dashPattern: [5, 4],
+                  radius: const Radius.circular(24),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: CustomColors.clockBG,
+                        borderRadius: BorderRadius.circular(24)),
+                    child: TextButton(
+                      style: ButtonStyle(
+                          padding: MaterialStateProperty.all(
+                        const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 16),
+                      )),
+                      onPressed: () {},
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/add_alarm.png',
+                            scale: 1.5,
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          const Text(
+                            'Add Alarm',
+                            style: TextStyle(
+                                color: Colors.white, fontFamily: 'avenir'),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 )
