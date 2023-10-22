@@ -1,5 +1,5 @@
 import 'package:myclock/enums.dart';
-import 'package:myclock/menu_info.dart';
+import 'package:myclock/models/menu_info.dart';
 
 List<MenuInfo> menuItems = [
   MenuInfo(MenuType.clock,
