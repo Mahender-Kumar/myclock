@@ -17,6 +17,20 @@ final StreamController<ReceivedNotification> didReceiveLocalNotificationStream =
 final StreamController<String?> selectNotificationStream =
     StreamController<String?>.broadcast();
 
+    @pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  // ignore: avoid_print
+  print('notification(${notificationResponse.id}) action tapped: '
+      '${notificationResponse.actionId} with'
+      ' payload: ${notificationResponse.payload}');
+  if (notificationResponse.input?.isNotEmpty ?? false) {
+    // ignore: avoid_print
+    print(
+        'notification action tapped with input: ${notificationResponse.input}');
+  }
+}
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   const AndroidInitializationSettings initializationSettingsAndroid =
@@ -34,16 +48,16 @@ void main() async {
         (NotificationResponse notificationResponse) {
       switch (notificationResponse.notificationResponseType) {
         case NotificationResponseType.selectedNotification:
-          // selectNotificationStream.add(notificationResponse.payload);
+          selectNotificationStream.add(notificationResponse.payload);
           break;
         case NotificationResponseType.selectedNotificationAction:
-          // if (notificationResponse.actionId == navigationActionId) {
-          //   selectNotificationStream.add(notificationResponse.payload);
-          // }
+          if (notificationResponse.actionId == navigationActionId) {
+            selectNotificationStream.add(notificationResponse.payload);
+          }
           break;
       }
     },
-    onDidReceiveBackgroundNotificationResponse: null,
+    onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
   );
 
   runApp(const MyApp());
