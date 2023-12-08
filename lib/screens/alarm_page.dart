@@ -1,6 +1,8 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:myclock/data.dart';
+import 'package:myclock/main.dart';
 import 'package:myclock/theme_data.dart';
 
 class AlarmPage extends StatefulWidget {
@@ -129,7 +131,9 @@ class _AlarmPageState extends State<AlarmPage> {
                         const EdgeInsets.symmetric(
                             horizontal: 32, vertical: 16),
                       )),
-                      onPressed: () {},
+                      onPressed: () {
+                        scheduleAlarm();
+                      },
                       child: Column(
                         children: [
                           Image.asset(
@@ -155,5 +159,32 @@ class _AlarmPageState extends State<AlarmPage> {
         ],
       ),
     );
+  }
+
+  Future<void> scheduleAlarm() async {
+    print('clicked1');
+    var scheduledNotificationDateTime =
+        DateTime.now().add(const Duration(seconds: 30));
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+      'alarm_notif',
+      'alarm_notif',
+      icon: 'mipmap/ic_launcher',
+      // sound: RawResourceAndroidNotificationSound('a_long_cold_string'),
+      largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+      importance: Importance.max,
+      priority: Priority.high,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
+    );
+    // var IOSPlatformChannelSpecifics = IOSNotificationsDetails(
+    //   sound:'a_long_cold_string',
+    //   presentAlert:true,
+    //   presentBadge:true,
+    //   presentSound:true,
+    // );
+
+    var platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(0, 'Office',
+        scheduledNotificationDateTime.toString(), platformChannelSpecifics);
   }
 }
