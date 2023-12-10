@@ -1,12 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:myclock/enums.dart';
 import 'package:myclock/home_page.dart';
 import 'package:myclock/models/menu_info.dart';
 import 'package:myclock/received_notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -17,7 +22,7 @@ final StreamController<ReceivedNotification> didReceiveLocalNotificationStream =
 final StreamController<String?> selectNotificationStream =
     StreamController<String?>.broadcast();
 
-    @pragma('vm:entry-point')
+@pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
   // ignore: avoid_print
   print('notification(${notificationResponse.id}) action tapped: '
@@ -30,9 +35,10 @@ void notificationTapBackground(NotificationResponse notificationResponse) {
   }
 }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _configureLocalTimeZone();
+
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -80,4 +86,13 @@ class MyApp extends StatelessWidget {
           child: const MyHomePage(title: 'Clock')),
     );
   }
+}
+
+Future<void> _configureLocalTimeZone() async {
+  if (kIsWeb || Platform.isLinux) {
+    return;
+  }
+  tz.initializeTimeZones();
+  final String? timeZoneName = await FlutterTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(timeZoneName!));
 }

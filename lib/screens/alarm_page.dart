@@ -4,6 +4,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:myclock/data.dart';
 import 'package:myclock/main.dart';
 import 'package:myclock/theme_data.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class AlarmPage extends StatefulWidget {
   const AlarmPage({super.key});
@@ -132,7 +134,9 @@ class _AlarmPageState extends State<AlarmPage> {
                             horizontal: 32, vertical: 16),
                       )),
                       onPressed: () {
-                        scheduleAlarm();
+                        // scheduleAlarm();
+                        // _zonedScheduleNotification();
+                        _zonedScheduleAlarmClockNotification();
                       },
                       child: Column(
                         children: [
@@ -184,7 +188,43 @@ class _AlarmPageState extends State<AlarmPage> {
 
     var platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, 'Office',
-        scheduledNotificationDateTime.toString(), platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'Office',
+        scheduledNotificationDateTime.toString(),
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        platformChannelSpecifics,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime);
+  }
+
+  Future<void> _zonedScheduleNotification() async {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'scheduled this title',
+        'scheduled body',
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        const NotificationDetails(
+            android: AndroidNotificationDetails(
+                'your channel id', 'your channel name',
+                channelDescription: 'your channel description')),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime);
+  }
+
+  Future<void> _zonedScheduleAlarmClockNotification() async {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+        123,
+        'scheduled alarm clock title',
+        'scheduled alarm clock body',
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        const NotificationDetails(
+            android: AndroidNotificationDetails(
+                'alarm_clock_channel', 'Alarm Clock Channel',
+                channelDescription: 'Alarm Clock Notification')),
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime);
   }
 }
