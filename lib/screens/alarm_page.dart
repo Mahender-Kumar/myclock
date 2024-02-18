@@ -35,6 +35,8 @@ class _AlarmPageState extends State<AlarmPage> {
             child: ListView(
               children: alarms.map<Widget>(
                 (alarm) {
+                  var gradientColor = GradientTemplate
+                      .gradientTemplate[alarm.gradientColorIndex!].colors;
                   return Container(
                     margin: const EdgeInsets.only(bottom: 32),
                     padding:
@@ -43,7 +45,7 @@ class _AlarmPageState extends State<AlarmPage> {
                     // height: 100,
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: alarm.gradientColors,
+                          colors: gradientColor,
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -52,7 +54,7 @@ class _AlarmPageState extends State<AlarmPage> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                              color: alarm.gradientColors.last.withOpacity(0.4),
+                              color: gradientColor.last.withOpacity(0.4),
                               blurRadius: 8,
                               spreadRadius: 2,
                               offset: const Offset(4, 4))

@@ -1,7 +1,7 @@
 import 'package:myclock/enums.dart';
 import 'package:myclock/models/alarm_info.dart';
 import 'package:myclock/models/menu_info.dart';
-import 'package:myclock/theme_data.dart';
+ 
 
 List<MenuInfo> menuItems = [
   MenuInfo(MenuType.clock,
@@ -15,15 +15,16 @@ List<MenuInfo> menuItems = [
 ];
 List<AlarmInfo> alarms = [
   AlarmInfo(
+    alarmDateTime:
       DateTime.now().add(
         const Duration(hours: 1),
       ),
-      description: 'Office',
-      gradientColors: GradientColors.sky),
+      title: 'Office',
+      gradientColorIndex: 0),
   AlarmInfo(
-      DateTime.now().add(
+     alarmDateTime: DateTime.now().add(
         const Duration(hours: 2),
       ),
-      description: 'Sport',
-      gradientColors: GradientColors.sunset),
+      title: 'Sport',
+      gradientColorIndex: 1),
 ];
