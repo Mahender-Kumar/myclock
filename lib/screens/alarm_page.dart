@@ -1,4 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +8,6 @@ import 'package:myclock/data.dart';
 import 'package:myclock/main.dart';
 import 'package:myclock/models/alarm_info.dart';
 import 'package:myclock/theme_data.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class AlarmPage extends StatefulWidget {
@@ -21,14 +21,16 @@ class _AlarmPageState extends State<AlarmPage> {
   DateTime? _alarmTime;
   String _alarmTimeString = '';
   bool _isRepeatSelected = false;
-  AlarmHelper _alarmHelper = AlarmHelper();
+  final AlarmHelper _alarmHelper = AlarmHelper();
   Future<List<AlarmInfo>>? _alarms;
-  List<AlarmInfo>? _currentAlarms;
+  // List<AlarmInfo>? _currentAlarms;
   @override
   void initState() {
     _alarmTime = DateTime.now();
     _alarmHelper.initializeDatabase().then((value) {
-      print('------database intialized-------');
+      if (kDebugMode) {
+        print('------database intialized-------');
+      }
       loadAlarms();
     });
     super.initState();
@@ -253,27 +255,6 @@ class _AlarmPageState extends State<AlarmPage> {
                                                 onPressed: () {
                                                   onSaveAlarm(
                                                       _isRepeatSelected);
-                                                  // DateTime?
-                                                  //     scheduleAlarmDateTime;
-                                                  // if (_alarmTime!.isAfter(
-                                                  //     DateTime.now())) {
-                                                  //   scheduleAlarmDateTime =
-                                                  //       _alarmTime;
-                                                  // } else {
-                                                  //   scheduleAlarmDateTime =
-                                                  //       _alarmTime!.add(
-                                                  //           const Duration(
-                                                  //               days: 1));
-                                                  // }
-                                                  // var alarmInfo = AlarmInfo(
-                                                  //   alarmDateTime:
-                                                  //       scheduleAlarmDateTime,
-                                                  //   gradientColorIndex:
-                                                  //       alarms.length,
-                                                  //   title: 'alarm',
-                                                  // );
-                                                  // _alarmHelper
-                                                  //     .insertAlarm(alarmInfo);
                                                 },
                                                 icon: const Icon(Icons.alarm),
                                                 label: const Text('Save'),
@@ -321,15 +302,16 @@ class _AlarmPageState extends State<AlarmPage> {
     );
   }
 
-  Future<void> scheduleAlarm(DateTime scheduledNotificationDateTime) async {
+  Future<void> scheduleAlarm(
+      DateTime scheduledNotificationDateTime, AlarmInfo alarmInfo) async {
     // print('clicked1');
     // var scheduledNotificationDateTime =
     //     DateTime.now().add(const Duration(seconds: 30));
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
       'alarm_notif',
-      'alarm_notif',
+      'alarm_notif', channelDescription: 'repeating description',
       icon: 'mipmap/ic_launcher',
-      sound: RawResourceAndroidNotificationSound('a_long_cold_string'),
+      // sound: RawResourceAndroidNotificationSound('a_long_cold_string'),
       largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
       importance: Importance.max,
       priority: Priority.high,
@@ -344,45 +326,47 @@ class _AlarmPageState extends State<AlarmPage> {
 
     var platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
+    // print(scheduledNotificationDateTime);
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
         'Office',
         scheduledNotificationDateTime.toString(),
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+        tz.TZDateTime.from(scheduledNotificationDateTime, tz.local),
         platformChannelSpecifics,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
   }
 
-  Future<void> _zonedScheduleNotification() async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
-        'scheduled this title',
-        'scheduled body',
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
-                'your channel id', 'your channel name',
-                channelDescription: 'your channel description')),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
-  }
+  // Future<void> _zonedScheduleNotification() async {
+  //   await flutterLocalNotificationsPlugin.zonedSchedule(
+  //       0,
+  //       'scheduled this title',
+  //       'scheduled body',
+  //       tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+  //       const NotificationDetails(
+  //           android: AndroidNotificationDetails(
+  //               'your channel id', 'your channel name',
+  //               channelDescription: 'your channel description')),
+  //       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  //       uiLocalNotificationDateInterpretation:
+  //           UILocalNotificationDateInterpretation.absoluteTime);
+  // }
 
-  Future<void> _zonedScheduleAlarmClockNotification() async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        123,
-        'scheduled alarm clock title',
-        'scheduled alarm clock body',
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
-                'alarm_clock_channel', 'Alarm Clock Channel',
-                channelDescription: 'Alarm Clock Notification')),
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
-  }
+  // Future<void> _zonedScheduleAlarmClockNotification() async {
+  //   await flutterLocalNotificationsPlugin.zonedSchedule(
+  //       123,
+  //       'scheduled alarm clock title',
+  //       'scheduled alarm clock body',
+  //       tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+  //       const NotificationDetails(
+  //           android: AndroidNotificationDetails(
+  //               'alarm_clock_channel', 'Alarm Clock Channel',
+  //               channelDescription: 'Alarm Clock Notification')),
+  //       androidScheduleMode: AndroidScheduleMode.alarmClock,
+  //       uiLocalNotificationDateInterpretation:
+  //           UILocalNotificationDateInterpretation.absoluteTime);
+  // }
 
   void onSaveAlarm(bool isRepeating) {
     DateTime? scheduleAlarmDateTime;
@@ -397,8 +381,8 @@ class _AlarmPageState extends State<AlarmPage> {
       title: 'alarm',
     );
     _alarmHelper.insertAlarm(alarmInfo);
-    scheduleAlarm(scheduleAlarmDateTime!);
-
+    scheduleAlarm(scheduleAlarmDateTime!, alarmInfo);
+    // print('object');
     Navigator.pop(context);
     loadAlarms();
   }
