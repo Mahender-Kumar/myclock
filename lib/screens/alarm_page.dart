@@ -29,15 +29,16 @@ class _AlarmPageState extends State<AlarmPage> {
     _alarmTime = DateTime.now();
     _alarmHelper.initializeDatabase().then((value) {
       print('------database intialized-------');
-      // loadAlarms();
+      loadAlarms();
     });
     super.initState();
   }
 
-  // void loadAlarms() {
-  //   _alarms = _alarmHelper.getAlarms();
-  //   if (mounted) setState(() {});
-  // }
+  void loadAlarms() {
+    _alarms = _alarmHelper.getAlarms();
+
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,230 +57,263 @@ class _AlarmPageState extends State<AlarmPage> {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: alarms.map<Widget>(
-                (alarm) {
-                  var gradientColor = GradientTemplate
-                      .gradientTemplate[alarm.gradientColorIndex!].colors;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 32),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    // color: Colors.blue,
-                    // height: 100,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: gradientColor,
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(24),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                              color: gradientColor.last.withOpacity(0.4),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                              offset: const Offset(4, 4))
-                        ]),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Row(
+            child: FutureBuilder(
+                future: _alarms,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView(
+                      children: snapshot.data!.map<Widget>(
+                        (alarm) {
+                          var gradientColor = GradientTemplate
+                              .gradientTemplate[alarm.gradientColorIndex!]
+                              .colors;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 32),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            // color: Colors.blue,
+                            // height: 100,
+                            decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: gradientColor,
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(24),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color:
+                                          gradientColor.last.withOpacity(0.4),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                      offset: const Offset(4, 4))
+                                ]),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.label,
-                                  color: Colors.white,
-                                  size: 24,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.label,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(
+                                          'Office',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: 'avenir',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Switch(
+                                        activeColor: Colors.white,
+                                        value: true,
+                                        onChanged: (bool value) {})
+                                  ],
                                 ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  'Office',
+                                const Text(
+                                  'Mon-Fri',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'avenir',
                                   ),
                                 ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      '07:00 AM',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: 'avenir',
+                                      ),
+                                    ),
+                                    IconButton(
+                                        onPressed: () {
+                                          _alarmHelper.delete(alarm.id!);
+                                          loadAlarms();
+                                        },
+                                        icon: const Icon(Icons.delete,
+                                            size: 36, color: Colors.white)),
+                                    // Icon(Icons.keyboard_arrow_down,
+                                    //     size: 36, color: Colors.white)
+                                  ],
+                                ),
                               ],
                             ),
-                            Switch(
-                                activeColor: Colors.white,
-                                value: true,
-                                onChanged: (bool value) {})
-                          ],
-                        ),
-                        const Text(
-                          'Mon-Fri',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'avenir',
-                          ),
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '07:00 AM',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'avenir',
+                          );
+                        },
+                      ).followedBy([
+                        DottedBorder(
+                          strokeWidth: 2,
+                          color: CustomColors.clockOutline,
+                          borderType: BorderType.RRect,
+                          dashPattern: const [5, 4],
+                          radius: const Radius.circular(24),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: CustomColors.clockBG,
+                                borderRadius: BorderRadius.circular(24)),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                  padding: MaterialStateProperty.all(
+                                const EdgeInsets.symmetric(
+                                    horizontal: 32, vertical: 16),
+                              )),
+                              onPressed: () {
+                                _alarmTimeString =
+                                    DateFormat('HH:mm').format(DateTime.now());
+                                showModalBottomSheet(
+                                  useRootNavigator: true,
+                                  context: context,
+                                  clipBehavior: Clip.antiAlias,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(24),
+                                    ),
+                                  ),
+                                  builder: (context) {
+                                    return StatefulBuilder(
+                                      builder: (context, setModalState) {
+                                        return Container(
+                                          padding: const EdgeInsets.all(32),
+                                          child: Column(
+                                            children: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  var selectedTime =
+                                                      await showTimePicker(
+                                                    context: context,
+                                                    initialTime:
+                                                        TimeOfDay.now(),
+                                                  );
+                                                  if (selectedTime != null) {
+                                                    final now = DateTime.now();
+                                                    var selectedDateTime =
+                                                        DateTime(
+                                                            now.year,
+                                                            now.month,
+                                                            now.day,
+                                                            selectedTime.hour,
+                                                            selectedTime
+                                                                .minute);
+                                                    _alarmTime =
+                                                        selectedDateTime;
+                                                    setModalState(() {
+                                                      _alarmTimeString =
+                                                          DateFormat('HH:mm')
+                                                              .format(
+                                                                  selectedDateTime);
+                                                    });
+                                                  }
+                                                },
+                                                child: Text(
+                                                  _alarmTimeString,
+                                                  style: const TextStyle(
+                                                      fontSize: 32),
+                                                ),
+                                              ),
+                                              ListTile(
+                                                title: const Text('Repeat'),
+                                                trailing: Switch(
+                                                  onChanged: (value) {
+                                                    setModalState(() {
+                                                      _isRepeatSelected = value;
+                                                    });
+                                                  },
+                                                  value: _isRepeatSelected,
+                                                ),
+                                              ),
+                                              const ListTile(
+                                                title: Text('Sound'),
+                                                trailing: Icon(
+                                                    Icons.arrow_forward_ios),
+                                              ),
+                                              const ListTile(
+                                                title: Text('Title'),
+                                                trailing: Icon(
+                                                    Icons.arrow_forward_ios),
+                                              ),
+                                              FloatingActionButton.extended(
+                                                onPressed: () {
+                                                  // onSaveAlarm(_isRepeatSelected);
+                                                  DateTime?
+                                                      scheduleAlarmDateTime;
+                                                  if (_alarmTime!.isAfter(
+                                                      DateTime.now())) {
+                                                    scheduleAlarmDateTime =
+                                                        _alarmTime;
+                                                  } else {
+                                                    scheduleAlarmDateTime =
+                                                        _alarmTime!.add(
+                                                            const Duration(
+                                                                days: 1));
+                                                  }
+                                                  var alarmInfo = AlarmInfo(
+                                                    alarmDateTime:
+                                                        scheduleAlarmDateTime,
+                                                    gradientColorIndex:
+                                                        alarms.length,
+                                                    title: 'alarm',
+                                                  );
+                                                  _alarmHelper
+                                                      .insertAlarm(alarmInfo);
+                                                },
+                                                icon: const Icon(Icons.alarm),
+                                                label: const Text('Save'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+
+                                // scheduleAlarm();
+                                // _zonedScheduleNotification();
+                                // _zonedScheduleAlarmClockNotification();
+                              },
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    'assets/add_alarm.png',
+                                    scale: 1.5,
+                                  ),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  const Text(
+                                    'Add Alarm',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'avenir'),
+                                  )
+                                ],
                               ),
                             ),
-                            Icon(Icons.keyboard_arrow_down,
-                                size: 36, color: Colors.white)
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ).followedBy([
-                DottedBorder(
-                  strokeWidth: 2,
-                  color: CustomColors.clockOutline,
-                  borderType: BorderType.RRect,
-                  dashPattern: [5, 4],
-                  radius: const Radius.circular(24),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: CustomColors.clockBG,
-                        borderRadius: BorderRadius.circular(24)),
-                    child: TextButton(
-                      style: ButtonStyle(
-                          padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 16),
-                      )),
-                      onPressed: () {
-                        _alarmTimeString =
-                            DateFormat('HH:mm').format(DateTime.now());
-                        showModalBottomSheet(
-                          useRootNavigator: true,
-                          context: context,
-                          clipBehavior: Clip.antiAlias,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(24),
-                            ),
                           ),
-                          builder: (context) {
-                            return StatefulBuilder(
-                              builder: (context, setModalState) {
-                                return Container(
-                                  padding: const EdgeInsets.all(32),
-                                  child: Column(
-                                    children: [
-                                      TextButton(
-                                        onPressed: () async {
-                                          var selectedTime =
-                                              await showTimePicker(
-                                            context: context,
-                                            initialTime: TimeOfDay.now(),
-                                          );
-                                          if (selectedTime != null) {
-                                            final now = DateTime.now();
-                                            var selectedDateTime = DateTime(
-                                                now.year,
-                                                now.month,
-                                                now.day,
-                                                selectedTime.hour,
-                                                selectedTime.minute);
-                                            _alarmTime = selectedDateTime;
-                                            setModalState(() {
-                                              _alarmTimeString =
-                                                  DateFormat('HH:mm')
-                                                      .format(selectedDateTime);
-                                            });
-                                          }
-                                        },
-                                        child: Text(
-                                          _alarmTimeString,
-                                          style: const TextStyle(fontSize: 32),
-                                        ),
-                                      ),
-                                      ListTile(
-                                        title: const Text('Repeat'),
-                                        trailing: Switch(
-                                          onChanged: (value) {
-                                            setModalState(() {
-                                              _isRepeatSelected = value;
-                                            });
-                                          },
-                                          value: _isRepeatSelected,
-                                        ),
-                                      ),
-                                      const ListTile(
-                                        title: Text('Sound'),
-                                        trailing: Icon(Icons.arrow_forward_ios),
-                                      ),
-                                      const ListTile(
-                                        title: Text('Title'),
-                                        trailing: Icon(Icons.arrow_forward_ios),
-                                      ),
-                                      FloatingActionButton.extended(
-                                        onPressed: () {
-                                          // onSaveAlarm(_isRepeatSelected);
-                                          DateTime? scheduleAlarmDateTime;
-                                          if (_alarmTime!
-                                              .isAfter(DateTime.now())) {
-                                            scheduleAlarmDateTime = _alarmTime;
-                                          } else {
-                                            scheduleAlarmDateTime = _alarmTime!
-                                                .add(const Duration(days: 1));
-                                          }
-                                          var alarmInfo = AlarmInfo(
-                                            alarmDateTime:
-                                                scheduleAlarmDateTime,
-                                            gradientColorIndex: alarms.length,
-                                            title: 'alarm',
-                                          );
-                                          _alarmHelper.insertAlarm(alarmInfo);
-                                        },
-                                        icon: const Icon(Icons.alarm),
-                                        label: const Text('Save'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        );
-
-                        // scheduleAlarm();
-                        // _zonedScheduleNotification();
-                        // _zonedScheduleAlarmClockNotification();
-                      },
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/add_alarm.png',
-                            scale: 1.5,
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          const Text(
-                            'Add Alarm',
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: 'avenir'),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ]).toList(),
-            ),
+                        )
+                      ]).toList(),
+                    );
+                  }
+                  return const Text('Loading...');
+                }),
           ),
         ],
       ),
