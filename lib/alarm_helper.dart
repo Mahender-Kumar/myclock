@@ -9,25 +9,26 @@ const String columnPending = 'isPending';
 const String columnColorIndex = 'gradientColorIndex';
 
 class AlarmHelper {
-  static late Database _database;
-  static late AlarmHelper _alarmHelper;
-
   AlarmHelper._createInstance();
+
+  static Database? _database;
+  static AlarmHelper? _alarmHelper;
+
   factory AlarmHelper() {
     if (_alarmHelper == null) {
       _alarmHelper = AlarmHelper._createInstance();
     }
-    return _alarmHelper;
+    return _alarmHelper!;
   }
 
   Future<Database> get database async {
     if (_database == null) {
-      _database = await initialeDatabase();
+      _database = await initializeDatabase();
     }
-    return _database;
+    return _database!;
   }
 
-  Future<Database> initialeDatabase() async {
+  Future<Database> initializeDatabase() async {
     var dir = await getDatabasesPath();
     var path = '${dir}alarm.db';
 
@@ -50,6 +51,7 @@ class AlarmHelper {
 
   void insertAlarm(AlarmInfo alarmInfo) async {
     var db = await this.database;
-    db.insert(tableAlarm, alarmInfo.toMap() );
+    var result = await db.insert(tableAlarm, alarmInfo.toMap());
+    print('result: $result');
   }
 }

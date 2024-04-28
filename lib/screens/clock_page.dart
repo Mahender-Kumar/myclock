@@ -102,7 +102,7 @@ class _ClockPageState extends State<ClockPage> {
                                   width: 16,
                                 ),
                                 Text(
-                                  'UTC' + offsetSign + timezoneString,
+                                  'UTC$offsetSign$timezoneString',
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontFamily: 'avenir',

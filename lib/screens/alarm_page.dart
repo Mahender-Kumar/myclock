@@ -1,8 +1,11 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
+import 'package:myclock/alarm_helper.dart';
 import 'package:myclock/data.dart';
 import 'package:myclock/main.dart';
+import 'package:myclock/models/alarm_info.dart';
 import 'package:myclock/theme_data.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -15,6 +18,27 @@ class AlarmPage extends StatefulWidget {
 }
 
 class _AlarmPageState extends State<AlarmPage> {
+  DateTime? _alarmTime;
+  String _alarmTimeString = '';
+  bool _isRepeatSelected = false;
+  AlarmHelper _alarmHelper = AlarmHelper();
+  Future<List<AlarmInfo>>? _alarms;
+  List<AlarmInfo>? _currentAlarms;
+  @override
+  void initState() {
+    _alarmTime = DateTime.now();
+    _alarmHelper.initializeDatabase().then((value) {
+      print('------database intialized-------');
+      // loadAlarms();
+    });
+    super.initState();
+  }
+
+  // void loadAlarms() {
+  //   _alarms = _alarmHelper.getAlarms();
+  //   if (mounted) setState(() {});
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -136,9 +160,104 @@ class _AlarmPageState extends State<AlarmPage> {
                             horizontal: 32, vertical: 16),
                       )),
                       onPressed: () {
+                        _alarmTimeString =
+                            DateFormat('HH:mm').format(DateTime.now());
+                        showModalBottomSheet(
+                          useRootNavigator: true,
+                          context: context,
+                          clipBehavior: Clip.antiAlias,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(24),
+                            ),
+                          ),
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (context, setModalState) {
+                                return Container(
+                                  padding: const EdgeInsets.all(32),
+                                  child: Column(
+                                    children: [
+                                      TextButton(
+                                        onPressed: () async {
+                                          var selectedTime =
+                                              await showTimePicker(
+                                            context: context,
+                                            initialTime: TimeOfDay.now(),
+                                          );
+                                          if (selectedTime != null) {
+                                            final now = DateTime.now();
+                                            var selectedDateTime = DateTime(
+                                                now.year,
+                                                now.month,
+                                                now.day,
+                                                selectedTime.hour,
+                                                selectedTime.minute);
+                                            _alarmTime = selectedDateTime;
+                                            setModalState(() {
+                                              _alarmTimeString =
+                                                  DateFormat('HH:mm')
+                                                      .format(selectedDateTime);
+                                            });
+                                          }
+                                        },
+                                        child: Text(
+                                          _alarmTimeString,
+                                          style: const TextStyle(fontSize: 32),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        title: const Text('Repeat'),
+                                        trailing: Switch(
+                                          onChanged: (value) {
+                                            setModalState(() {
+                                              _isRepeatSelected = value;
+                                            });
+                                          },
+                                          value: _isRepeatSelected,
+                                        ),
+                                      ),
+                                      const ListTile(
+                                        title: Text('Sound'),
+                                        trailing: Icon(Icons.arrow_forward_ios),
+                                      ),
+                                      const ListTile(
+                                        title: Text('Title'),
+                                        trailing: Icon(Icons.arrow_forward_ios),
+                                      ),
+                                      FloatingActionButton.extended(
+                                        onPressed: () {
+                                          // onSaveAlarm(_isRepeatSelected);
+                                          DateTime? scheduleAlarmDateTime;
+                                          if (_alarmTime!
+                                              .isAfter(DateTime.now())) {
+                                            scheduleAlarmDateTime = _alarmTime;
+                                          } else {
+                                            scheduleAlarmDateTime = _alarmTime!
+                                                .add(const Duration(days: 1));
+                                          }
+                                          var alarmInfo = AlarmInfo(
+                                            alarmDateTime:
+                                                scheduleAlarmDateTime,
+                                            gradientColorIndex: alarms.length,
+                                            title: 'alarm',
+                                          );
+                                          _alarmHelper.insertAlarm(alarmInfo);
+                                        },
+                                        icon: const Icon(Icons.alarm),
+                                        label: const Text('Save'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+
                         // scheduleAlarm();
                         // _zonedScheduleNotification();
-                        _zonedScheduleAlarmClockNotification();
+                        // _zonedScheduleAlarmClockNotification();
                       },
                       child: Column(
                         children: [
@@ -229,4 +348,25 @@ class _AlarmPageState extends State<AlarmPage> {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime);
   }
+
+  // void onSaveAlarm(bool _isRepeating) {
+  //   DateTime? scheduleAlarmDateTime;
+  //   if (_alarmTime!.isAfter(DateTime.now()))
+  //     scheduleAlarmDateTime = _alarmTime;
+  //   else
+  //     scheduleAlarmDateTime = _alarmTime!.add(Duration(days: 1));
+
+  //   var alarmInfo = AlarmInfo(
+  //     alarmDateTime: scheduleAlarmDateTime,
+  //     gradientColorIndex: _currentAlarms!.length,
+  //     title: 'alarm',
+  //   );
+  //   _alarmHelper.insertAlarm(alarmInfo);
+  //   if (scheduleAlarmDateTime != null) {
+  //     // scheduleAlarm(scheduleAlarmDateTime, alarmInfo,
+  //     //     isRepeating: _isRepeating);
+  //   }
+  //   Navigator.pop(context);
+  //   // loadAlarms();
+  // }
 }
