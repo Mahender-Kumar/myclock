@@ -133,9 +133,9 @@ class _AlarmPageState extends State<AlarmPage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                      '07:00 AM',
-                                      style: TextStyle(
+                                    Text(
+                                      '${alarm.alarmDateTime!.hour}:${alarm.alarmDateTime!.minute}',
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 24,
                                         fontWeight: FontWeight.w700,
@@ -251,28 +251,29 @@ class _AlarmPageState extends State<AlarmPage> {
                                               ),
                                               FloatingActionButton.extended(
                                                 onPressed: () {
-                                                  // onSaveAlarm(_isRepeatSelected);
-                                                  DateTime?
-                                                      scheduleAlarmDateTime;
-                                                  if (_alarmTime!.isAfter(
-                                                      DateTime.now())) {
-                                                    scheduleAlarmDateTime =
-                                                        _alarmTime;
-                                                  } else {
-                                                    scheduleAlarmDateTime =
-                                                        _alarmTime!.add(
-                                                            const Duration(
-                                                                days: 1));
-                                                  }
-                                                  var alarmInfo = AlarmInfo(
-                                                    alarmDateTime:
-                                                        scheduleAlarmDateTime,
-                                                    gradientColorIndex:
-                                                        alarms.length,
-                                                    title: 'alarm',
-                                                  );
-                                                  _alarmHelper
-                                                      .insertAlarm(alarmInfo);
+                                                  onSaveAlarm(
+                                                      _isRepeatSelected);
+                                                  // DateTime?
+                                                  //     scheduleAlarmDateTime;
+                                                  // if (_alarmTime!.isAfter(
+                                                  //     DateTime.now())) {
+                                                  //   scheduleAlarmDateTime =
+                                                  //       _alarmTime;
+                                                  // } else {
+                                                  //   scheduleAlarmDateTime =
+                                                  //       _alarmTime!.add(
+                                                  //           const Duration(
+                                                  //               days: 1));
+                                                  // }
+                                                  // var alarmInfo = AlarmInfo(
+                                                  //   alarmDateTime:
+                                                  //       scheduleAlarmDateTime,
+                                                  //   gradientColorIndex:
+                                                  //       alarms.length,
+                                                  //   title: 'alarm',
+                                                  // );
+                                                  // _alarmHelper
+                                                  //     .insertAlarm(alarmInfo);
                                                 },
                                                 icon: const Icon(Icons.alarm),
                                                 label: const Text('Save'),
@@ -320,15 +321,15 @@ class _AlarmPageState extends State<AlarmPage> {
     );
   }
 
-  Future<void> scheduleAlarm() async {
-    print('clicked1');
-    var scheduledNotificationDateTime =
-        DateTime.now().add(const Duration(seconds: 30));
+  Future<void> scheduleAlarm(DateTime scheduledNotificationDateTime) async {
+    // print('clicked1');
+    // var scheduledNotificationDateTime =
+    //     DateTime.now().add(const Duration(seconds: 30));
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
       'alarm_notif',
       'alarm_notif',
       icon: 'mipmap/ic_launcher',
-      // sound: RawResourceAndroidNotificationSound('a_long_cold_string'),
+      sound: RawResourceAndroidNotificationSound('a_long_cold_string'),
       largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
       importance: Importance.max,
       priority: Priority.high,
@@ -383,24 +384,22 @@ class _AlarmPageState extends State<AlarmPage> {
             UILocalNotificationDateInterpretation.absoluteTime);
   }
 
-  // void onSaveAlarm(bool _isRepeating) {
-  //   DateTime? scheduleAlarmDateTime;
-  //   if (_alarmTime!.isAfter(DateTime.now()))
-  //     scheduleAlarmDateTime = _alarmTime;
-  //   else
-  //     scheduleAlarmDateTime = _alarmTime!.add(Duration(days: 1));
+  void onSaveAlarm(bool isRepeating) {
+    DateTime? scheduleAlarmDateTime;
+    if (_alarmTime!.isAfter(DateTime.now())) {
+      scheduleAlarmDateTime = _alarmTime;
+    } else {
+      scheduleAlarmDateTime = _alarmTime!.add(const Duration(days: 1));
+    }
+    var alarmInfo = AlarmInfo(
+      alarmDateTime: scheduleAlarmDateTime,
+      gradientColorIndex: alarms.length,
+      title: 'alarm',
+    );
+    _alarmHelper.insertAlarm(alarmInfo);
+    scheduleAlarm(scheduleAlarmDateTime!);
 
-  //   var alarmInfo = AlarmInfo(
-  //     alarmDateTime: scheduleAlarmDateTime,
-  //     gradientColorIndex: _currentAlarms!.length,
-  //     title: 'alarm',
-  //   );
-  //   _alarmHelper.insertAlarm(alarmInfo);
-  //   if (scheduleAlarmDateTime != null) {
-  //     // scheduleAlarm(scheduleAlarmDateTime, alarmInfo,
-  //     //     isRepeating: _isRepeating);
-  //   }
-  //   Navigator.pop(context);
-  //   // loadAlarms();
-  // }
+    Navigator.pop(context);
+    loadAlarms();
+  }
 }
